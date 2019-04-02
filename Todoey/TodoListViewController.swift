@@ -10,12 +10,14 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    let itemArray = ["Walk Dogs", "Empty Dishwasher", "Clean Patio"]
+    var itemArray = ["Walk Dogs", "Empty Dishwasher", "Clean Patio"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
     }
 
+    //MARK - tableView datasource methods
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -49,6 +51,35 @@ class TodoListViewController: UITableViewController {
         //removes row highlight
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
+    //MARK - Add new items
+    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New To do Item", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            //this area of code determines what happens when user clicks add item button in alert
+            print("this is a test")
+            self.itemArray.append(textField.text!)
+            self.tableView.reloadData()
+        }
+        //adds textfield to alert
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create New Item"
+            textField = alertTextField
+        }
+        
+        //adds the action to the alert
+        alert.addAction(action)
+        
+        //shows the alert
+        present(alert, animated: true, completion: nil)
+        
+    }
+    
 
 }
 
