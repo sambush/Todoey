@@ -12,6 +12,8 @@ class TodoListViewController: UITableViewController {
 
     var itemArray = ["Walk Dogs", "Empty Dishwasher", "Clean Patio"]
     
+    //let defaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
