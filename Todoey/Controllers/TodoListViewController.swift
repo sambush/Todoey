@@ -15,11 +15,12 @@ class TodoListViewController: UITableViewController {
     let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
+        super.viewDidLoad()
         //set item array to stored default array
         //add if statement incase defaults array is empty
-        //if let items = defaults.array(forKey: "TodoListArray") as? [String]{
-           // itemArray = items
-        //}
+        if let items = defaults.array(forKey: "TodoListArray") as? [Item]{
+            itemArray = items
+        }
         
         let newItem = Item()
         newItem.title = "Walk the Pups"
@@ -33,7 +34,7 @@ class TodoListViewController: UITableViewController {
         newItem3.title = "Empty Dishwasher"
         itemArray.append(newItem3)
         
-        super.viewDidLoad()
+        
     }
 
     //MARK - tableView datasource methods
@@ -77,7 +78,7 @@ class TodoListViewController: UITableViewController {
         
         //using = ! means equals the opposite
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        
+        tableView.reloadData()
         
         
 //        //adds check mark on item.
@@ -88,8 +89,8 @@ class TodoListViewController: UITableViewController {
 //
 //        }
 //
-        //removes row highlight
-        tableView.deselectRow(at: indexPath, animated: true)
+        //removes row highlight old school method
+       // tableView.deselectRow(at: indexPath, animated: true)
     }
     
     //MARK - Add new items
