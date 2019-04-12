@@ -7,6 +7,8 @@
 //
 
 import UIKit
+//be sure to import coreData
+import CoreData
 
 class TodoListViewController: UITableViewController {
 
@@ -14,7 +16,8 @@ class TodoListViewController: UITableViewController {
     
     let defaults = UserDefaults.standard
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,7 +30,6 @@ class TodoListViewController: UITableViewController {
 //            itemArray = items
 //        }
 
-        
         loadItems()
         
     }
@@ -70,6 +72,14 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
        // print(itemArray[indexPath.row])
+       
+        //this is how you update a value and then save using context.save()
+      //  itemArray[indexPath.row].setValue("completed", forKey: "title")
+        
+        //how to delete an item. must remove it from the context first
+        context.delete(itemArray[indexPath.row])
+        itemArray.remove(at: indexPath.row)
+
         
         //using = ! means equals the opposite
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
@@ -99,9 +109,11 @@ class TodoListViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //this area of code determines what happens when user clicks add item button in alert
-         
-            let newItem = Item()
+            
+            let newItem = Item(context: self.context)
+            
             newItem.title = textField.text!
+            newItem.done = false
             self.itemArray.append(newItem)
             
             self.saveItems()
@@ -121,12 +133,10 @@ class TodoListViewController: UITableViewController {
         
     }
     
+    //creating, updating and deleting requires a save
     func saveItems(){
-        let encoder = PropertyListEncoder()
         do{
-            let data = try encoder.encode(itemArray)
-            
-            try data.write(to: dataFilePath!)
+         try context.save()
         }catch{
             print("error encoding itemArray")
         }
@@ -135,15 +145,13 @@ class TodoListViewController: UITableViewController {
     }
     
     func loadItems(){
-        
-        if let data = try? Data(contentsOf: dataFilePath!){
-            let decoder = PropertyListDecoder()
-            do {
-            itemArray = try decoder.decode([Item].self, from: data)
-            }catch{
-                print(error)
-            }
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        do{
+        itemArray = try context.fetch(request)
+        }catch{
+            print(error)
         }
+      
     }
     
 
