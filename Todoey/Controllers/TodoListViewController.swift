@@ -19,8 +19,12 @@ class TodoListViewController: UITableViewController {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     
+    
     override func viewDidLoad() {
+        
+        
         super.viewDidLoad()
+        
         //create a file path to the documents folder, use .first since it is an array
       
         
@@ -77,8 +81,8 @@ class TodoListViewController: UITableViewController {
       //  itemArray[indexPath.row].setValue("completed", forKey: "title")
         
         //how to delete an item. must remove it from the context first
-        context.delete(itemArray[indexPath.row])
-        itemArray.remove(at: indexPath.row)
+       // context.delete(itemArray[indexPath.row])
+        //itemArray.remove(at: indexPath.row)
 
         
         //using = ! means equals the opposite
@@ -144,16 +148,53 @@ class TodoListViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    func loadItems(){
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+    //this function expects a request parameter but if there is not one then it makes item.fetchrequest the default value
+    func loadItems(with request:NSFetchRequest<Item> = Item.fetchRequest()){
+       
+        //line below is how to fetch all items from coredata but not needed
+        //let request : NSFetchRequest<Item> = Item.fetchRequest()
         do{
         itemArray = try context.fetch(request)
+            tableView.reloadData()
         }catch{
             print(error)
         }
       
     }
     
-
+  
 }
+//MARK: - Search Bar Methods
+extension TodoListViewController: UISearchBarDelegate{
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        //use NSPredicate to query coredata
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        
+        request.sortDescriptors = [sortDescriptor]
+        
+        loadItems(with: request)
+     
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            
+            //ask the dispatch queue to run the main queue and then run this function. This will run the function in the background
+            DispatchQueue.main.async {
+                //removes keyboard and removes cursor from search
+                searchBar.resignFirstResponder()
+            }
+            
+            
+        }
+    }
+    
+}
+
 
