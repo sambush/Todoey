@@ -9,6 +9,7 @@
 import UIKit
 //be sure to import core data framework
 import CoreData
+import RealmSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,9 +18,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        //use this to find directory where defaults are stored
-       // print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String)
-        // Override point for customization after application launch.
+      
+        
+        let data = Data()
+        data.name = "Sam"
+        data.age = 25
+        
+        //initalize Realm
+        do{
+            let realm = try Realm()
+            try realm.write {
+                realm.add(data)
+            }
+        }catch{
+            print(error)
+        }
+        
+      
+        
+        
         return true
     }
 
