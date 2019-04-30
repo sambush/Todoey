@@ -7,20 +7,20 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
 
-    var categoryArray = [itemCategory]()
+    let realm = try! Realm()
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-
-    
+    //inorder to use Realm the categories variable must be of data type Results
+    //use question mark to make it an optional
+    var categories: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadCategory()
+     loadCategories()
        
     }
 
@@ -37,11 +37,11 @@ class CategoryViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add Category", style: .default) { (action) in
             
-            let newCategory = itemCategory(context: self.context)
+            let newCategory = Category()
             
             newCategory.name = textField.text!
-            self.categoryArray.append(newCategory)
-            self.saveCategory()
+            
+            self.save(category: newCategory)
             
         }
         
@@ -69,17 +69,17 @@ class CategoryViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
+        //if categories is nill then return 1
+        return categories?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell")!
         
-        let item = categoryArray[indexPath.row]
+        //if categores is nil then return string text
+        let item = categories?[indexPath.row].name ?? "No Categories Added"
         
-        let categoryName = item.name
-        
-        cell.textLabel?.text = categoryName
+        cell.textLabel?.text = item
         
         return cell
     }
@@ -96,7 +96,7 @@ class CategoryViewController: UITableViewController {
         
         if let indexPath = tableView.indexPathForSelectedRow {
             //the selectedCategory property is in the TodoListViewController
-            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            destinationVC.selectedCategory = categories?[indexPath.row]
         }
         
         //get category that corresponds to the selected cell - determine what is the selected cell
@@ -107,9 +107,11 @@ class CategoryViewController: UITableViewController {
     
     //MARK: - Tableview Delegate Methods (save data and load data)
     
-    func saveCategory(){
+    func save(category: Category){
         do{
-            try context.save()
+            try realm.write {
+                realm.add(category)
+            }
         }catch{
             print(error)
         }
@@ -117,15 +119,12 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    func loadCategory(with request:NSFetchRequest<itemCategory> = itemCategory.fetchRequest()){
-        
-        do{
-           categoryArray = try context.fetch(request)
-           tableView.reloadData()
-        }catch{
-            print(error)
-        }
-        
+    func loadCategories(){
+        //fetch all of the objects that belong to the category datatype
+        //categories was initalized and set as a Results
+        categories = realm.objects(Category.self)
+        tableView.reloadData()
+    
     }
     
 
